@@ -1,0 +1,60 @@
+{
+  "package": "com.gouwu.ppt",
+  "name": "拼拼团",
+  "versionName": "1.0.0",
+  "versionCode": "1",
+  "minPlatformVersion": "101",
+  "icon": "/Common/logo.png",
+  "features": [
+    { "name": "system.prompt" },
+    { "name": "system.router" },
+    { "name": "system.shortcut"},
+    { "name": "system.fetch"},
+    { "name": "system.webview"},
+    {"name": "system.device"}
+  ],
+  "permissions": [
+    { "origin": "*" }
+  ],
+  "config": {
+    "logLevel": "debug"
+  },
+  "router": {
+    "entry": "Home",
+    "pages": {
+      "Home": {
+        "component": "index"
+      },
+      "DemoDetail": {
+        "component": "index"
+      },
+      "About": {
+        "component": "index"
+      },
+      "Search": {
+        "component": "index"
+      }
+    }
+  },
+  "display": {
+    "titleBarBackgroundColor": "#f2f2f2",
+    "titleBarTextColor": "#414141",
+    "menu": true,
+    "pages": {
+      "Home": {
+        "titleBar": false,
+        "menu": true
+      },
+      "Search": {
+        "titleBar": false,
+        "menu": true
+      },
+      "DemoDetail": {
+        "titleBarText": "详情页"
+      },
+      "About": {
+        "menu": false
+      }
+    }
+  }
+}

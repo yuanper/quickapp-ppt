@@ -1,0 +1,251 @@
+<import name="comp-goods-info" src="../components/goods/index"></import>
+<import name="comp-swiper" src="../components/swiper/index"></import>
+<!-- <import name="comp-category" src="../components/category/index"></import> -->
+<import name="comp-title" src="../components/title/index"></import>
+<template>
+    <div class="home">
+        <comp-title title="{{headerTitle}}" search-url="{{searchUrl}}"></comp-title>
+        <refresh refreshing="{{refreshing}}" onrefresh="refresh">
+            <div class="goods-wrapper">
+                <list class="goods-list" onscrollbottom="renderMoreListItem">
+                    <list-item type="banner" class="banner">
+                        <comp-swiper swiper-image-list="{{bannerList}}" is-auto-play="{{isAutoPlay}}" interval="{{time}}" indicator="{{isIndicator}}"
+                            indicator-color="{{indicatorColor}}" indicator-selected-color="{{indicatorSelectedColor}}">
+                        </comp-swiper>
+                    </list-item>
+                    <!-- <list-item type="hotGoods" class="hot-goods">
+                        <comp-category goods-list="{{hotGoods}}"></comp-category>
+                    </list-item> -->
+                    <list-item type="title" class="title">
+                        <text>{{title}}</text>
+                    </list-item>
+                   
+                        <list-item for="goodsList" type="goods" class="goods" show="{{isHasGoods}}">
+                            <comp-goods-info goods-image="{{$item.goods_image}}" goods-name="{{$item.goods_title}}" goods-price="{{$item.goods_price}}"
+                                goods-url="{{$item.goods_detail_url}}" goods-coupon="{{$item.goods_coupon}}" goods-coupon-details="{{$item.goods_coupon_details}}"></comp-goods-info>
+                        </list-item>
+                    
+                    <list-item type="loadStatus" class="load-status">
+                        <progress type="circular" show="{{hasMoreData}}"></progress>
+                        <text show="{{hasMoreData}}">加载更多</text>
+                        <text show="{{!hasMoreData}}">没有更多了</text>
+                    </list-item>
+                </list>
+            </div>
+        </refresh>
+    </div>
+</template>
+<style>
+    .home{
+        display: flex;
+        flex-direction: column;
+	    height: 100%;
+    }
+    .goods-wrapper{
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    .goods-list{
+        flex-direction: column;
+        columns: 2;
+        height: 100%;
+    }
+    .title{
+        display: flex;
+        flex-direction: column;
+        height: 80px;
+         column-span: 2;
+        justify-content: center;
+        align-items: center;
+    }
+    .goods{
+        display: flex;
+        width: 50%;
+        height: 500px;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+    }
+    .banner{
+        display: flex;
+        flex-direction: column;
+        column-span: 2;
+    }
+    .hot-goods{
+        display: flex;
+        flex-direction: column;
+        column-span: 2;
+    }
+    .load-status{
+        display: flex;
+        height: 100px;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        column-span: 2;
+    }
+</style>
+<script>
+    import fetch from '@system.fetch'
+    import router from '@system.router'
+    import device from '@system.device'
+    import prompt from '@system.prompt'
+    //数据库中的数据列表
+    let memList = [];
+    export default {
+        data: {
+            refreshing: false,
+            headerTitle: '首页',
+            searchUrl: '',
+            goodsList: [],
+            bannerList: [],
+            isAutoPlay: true,//是否自动轮播
+            time: 3000,//轮播的时间间隔
+            isIndicator: true,//是否显示轮播的圆点
+            indicatorColor: 'rgba(0, 0, 0, 0.5)',//轮播圆点的填充色
+            indicatorSelectedColor: '#33b4ff',//圆点的选中颜色
+            hasMoreData: true,
+            size:10,//每次渲染的商品数,
+            lastIndex: 0,//上次获取商品的最后序列
+            isLoadingData: false,//是否正在请求数据
+            mi: '',//设备的唯一标识
+            mt: '',//设备的品牌名称
+            isHasGoods: false,
+            title: ''
+        },
+        onInit(){
+            this.getDeviceInfo()
+            this.getBannerList()
+            this.loadAndRender()
+            this.getSearchUrl()
+        },
+        refresh(evt) {
+            this.lastIndex = 0;
+            this.refreshing = true;
+            this.isHasGoods = false;
+            memList = [];
+            this.getBannerList();
+            this.loadAndRender();
+            this.goodsList = [];
+        },
+        loadAndRender(doRender = true){
+            this.isLoadingData = true;
+            this.getData(
+                function (resList) {
+                    this.isLoadingData = false;
+                    this.refreshing = false;
+                    if (!resList) {
+                        console.error(`数据请求错误`)
+                    }
+                    else if (!resList.goodlist) {
+                        this.hasMoreData = false
+                    }
+                    else {
+                        this.lastIndex = resList.lastindex;
+                        this.title = resList.title;//热卖商品
+                        // this.formatGoodsCoupon(resList.goodlist)//对优惠券信息格式化
+                        memList = memList.concat(resList.goodlist)
+                        if (doRender) {
+                            this._renderList()
+                        }
+                    }
+                }.bind(this)
+            )
+        },
+        _renderList() {
+            if(memList.length > 0){
+                const list = memList.splice(0,this.size);
+                this.goodsList = this.goodsList.concat(list)
+                if(this.goodsList.length >0) {
+                    this.isHasGoods = true
+                }
+            }
+            if(memList.length <= this.size){
+                //提前请求数据
+                this.loadAndRender(false)
+            }
+        },
+        renderMoreListItem() {
+            if(!this.isLoadingData){
+                this._renderList()
+            }
+        },
+        getBannerList() {
+            let self = this;
+            let headers = { "type": "rpk", "mi": this.mi, "mt": this.mt }
+            fetch && fetch.fetch({
+                url: 'http://120.79.61.208:48126/shop/pdd/getbannerlist',
+                header: headers,
+                success: function (result) {                    
+                    let res = JSON.parse(result.data)
+                    self.bannerList = res.bannerlist               
+                },
+                fail: function (result, code) {
+                    console.log(`handing fail,code=${code}`)
+                }
+            })
+        },
+        getSearchUrl() {
+            let _this = this
+            let headers = { "type": "rpk", "mi": this.mi, "mt": this.mt }
+            fetch && fetch.fetch({
+                url: 'http://120.79.61.208:48126/shop/pdd/search',
+                header: headers,
+                success: function (result) {
+                    let res = JSON.parse(result.data)
+                    _this.searchUrl = res.url
+                }
+            })
+        },
+        getData(cb) {
+            let headers = { "type": "rpk", "mi": this.mi, "mt": this.mt, "goodtype": 0, "index": this.lastIndex }
+            fetch && fetch.fetch({
+                url: 'http://120.79.61.208:48126/shop/pdd/getgoodslist',
+                header: headers,
+                success: function (result) {
+                    let res = JSON.parse(result.data);
+                    cb(res);
+                },
+                fail: function (result, code) {
+                    console.log(`handing fail,code=${code}`);
+                    cb([]);
+                }
+            })
+        },
+        formatGoodsCoupon(list) {           
+            list.map(function(item,index) {
+                //有两种：一种是满减，一种是无条件；满99减10元，5元无条件
+                let str = item.goods_coupon_details;
+                let i = str.indexOf('满')
+                if(i > -1){
+                    let arr = str.split('减');
+                    item.goods_coupon_details = arr[1];
+                }else{
+                    let arr = str.split('元')
+                    item.goods_coupon_details = arr[0] + '元'
+                }                
+            })
+        },
+        getDeviceInfo() {
+            let self = this;
+            device.getInfo({
+                success: function(res) {
+                    self.mt = res.brand + ' ' + res.model
+                    console.log(self.mt)
+                }
+            })
+            device.getId({
+                type: ['device'],
+                success: function(res) {
+                    console.log(JSON.stringify(res))
+                    self.mi = res.device
+                },
+                fail: function(data,code) {
+                    console.log(`handling fail, code = ${code}`)
+                }
+            })
+        },
+    }
+</script>

@@ -1,0 +1,61 @@
+<template>
+    <div class="header">
+        <div class="search">
+            <text class="title">{{title}}</text>
+            <input type="text" placeholder="请输入关键词" @focus="routerGo(searchUrl)"/>
+            <image src="/assets/search_0.png" class="search-icon"></image>
+        </div>
+    </div>
+</template>
+<style>
+    .header{
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100px;
+        justify-content: center;
+        background-color: #f58e08;
+    }
+    .search{
+        width: 100%;
+        height: 100px;
+        align-items: center;
+        justify-content: center;
+        background-color: #f58e08;
+    }
+    .title{
+        font-size: 36px;
+        color: #ffffff;
+        margin-right: 20px;
+    }
+    .search-icon{
+        width: 50px;
+        height: 50px;
+        margin-left: 20px;
+    }
+    .search input{
+        width: 500px;
+        height: 60px;
+        align-content: center;
+        justify-content: center;
+        border: 1px solid #666666;
+        border-radius: 60px;
+        padding-left: 20px;
+        padding-right: 20px;
+        font-size: 24px;
+        background-color: #f2f2f2;
+        color: #666666;
+    }
+</style>
+<script>
+    import router from '@system.router'
+    import webview from '@system.webview'
+    export default {
+        props: ["title","searchUrl"],
+        routerGo(url) {
+            webview.loadUrl({
+                url: url
+            })
+        }
+    }
+</script>

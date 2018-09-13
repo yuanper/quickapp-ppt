@@ -1,0 +1,38 @@
+<template>
+    <div class="wrapper">
+        <swiper class="swiper" autoplay="{{isAutoPlay}}" 
+            interval="{{interval}}" 
+            indicator="{{indicator}}"
+            style="indicator-color:{{indicatorColor}};indicator-selected-color:{{indicatorSelectedColor}}"
+            >
+            <div class="swiper-img" for="{{swiperImageList}}" @click="routerGo($item.goods_detail_url)">
+                <image class="img" src="{{$item.goods_image}}" style="resize-mode:cover;width: 100%;height:100%;"></image>
+            </div>
+        </swiper>
+    </div>
+</template>
+<style>
+    .wrapper{
+        width: 750px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .swiper{
+        width: 100%;
+        height: 400px;
+    }
+
+</style>
+<script>
+    import webview from '@system.webview'
+    export default {
+        props: ['swiperImageList','isAutoPlay','interval','indicator','indicatorColor','indicatorSelectedColor'],
+        routerGo(url) {
+            webview.loadUrl({
+                url: url
+            })
+        }
+    }
+</script>

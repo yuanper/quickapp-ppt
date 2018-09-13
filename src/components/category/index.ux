@@ -1,0 +1,47 @@
+<import name="comp-goods-info" src="../goods/index"></import>
+<template>
+    <div class="category">
+        <text class="title">{{goodsList.title}}</text>
+        <block for="goodsList.goodlist">
+            <div class="goods">
+                <comp-goods-info goods-image="{{$item.goods_image}}" 
+                    goods-price="{{$item.goods_price}}" 
+                    goods-name="{{$item.goods_title}}"
+                    goods-url="{{$item.goods_detail_url}}"
+                    goods-coupon="{{$item.goods_coupon}}"
+                    goods-coupon-details="{{$item.goods_coupon_details}}">
+                </comp-goods-info>
+            </div>
+        </block>
+    </div>
+</template>
+<style>
+    .category{
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+    }
+    .title{
+        width: 100%;
+        height: 80px;
+        line-height: 80px;
+        text-align: center;
+        font-size: 30px;
+    }
+    .goods{
+        display: flex;
+        flex-direction: column;
+        width: 50%;
+        height: 500px;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
+<script>
+    export default {
+        props: ['goodsList'],       
+    }
+</script>

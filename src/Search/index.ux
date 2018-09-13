@@ -1,0 +1,72 @@
+<import name="comp-goods" src="../components/goods/index"></import>
+<template>
+    <div class="search">
+        <div class="header">
+            <image src="/assets/back.png" style="width: 50px;margin-left: 50px;margin-right: 100px" @click="back"></image>
+            <input type="text"placeholder="请输入关键词" enterkeytype="search" @change="search(evt)" />
+        </div>
+        <list style="flex-direction: column;columns:2">
+            <block for="goodsList">
+                <list-item type="goods" class="list-item">
+                    <comp-goods goods-image="{{$item.goods_image}}" goods-name="{{$item.goods_title}}" goods-price="{{$item.goods_price}}" goods-url="{{$item.goods_detail_url}}"></comp-goods>
+                </list-item>
+            </block>
+        </list>
+    </div>
+</template>
+<style>
+    .search{
+        display: flex;
+        flex-direction: column;
+        width: 750px;
+        height: 100%;
+    }
+    .header{ 
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+        height: 150px;
+        background-color: #f2f2f2;
+    }
+    .header input{
+        font-size: 30px
+    }
+    .list-item{
+        display: flex;
+        flex-direction: column;
+        width: 50%;
+        justify-content: center;
+        align-items: center;
+        height: 500px;
+        margin-top: 20px;
+    }
+</style>
+<script>
+    import router from '@system.router'
+    import fetch from '@system.fetch'
+    export default {
+        private: {
+            goodsList: []
+        },
+        back() {
+            router.back()
+        },
+        search(evt) {
+            let self = this;
+            let headers = { "type": "rpk", "mi": "864839032741684", "mt": "GIONEE S10C" }
+            fetch && fetch.fetch({
+                url: 'http://39.108.219.191:36912/shop/search',
+                header: headers,
+                success: function (result) {
+                    let res = result.data;
+                    self.goodsList = JSON.parse(res).searchList
+                    console.log(JSON.stringify(self.goodsList))
+                },
+                fail: function (result, code) {
+                    console.log(`handing fail,code=${code}`)
+                }
+            })
+        }
+    }
+</script>
